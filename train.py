@@ -10,7 +10,7 @@ from typing import Optional, Tuple
 import dm_env_wrappers as wrappers
 from dataclasses import dataclass, asdict
 from robopianist.robopianist import suite
-import robopianist.wrappers as robopianist_wrappers
+import robopianist.robopianist.wrappers as robopianist_wrappers
 
 # LOCAL LIBRARY
 from core import ReplayBuffer
