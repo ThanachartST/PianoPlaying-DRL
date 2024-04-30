@@ -1,13 +1,15 @@
-import numpy as np
+# OPEN-SOURCE LIBRARY
 import torch
-from torch import Tensor
+import numpy as np
 import torch.nn as nn
+from torch import Tensor
 import torch.optim as optim
-
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Sequence
 
-from core import TanhGaussianPolicy, Mlp
+# LOCAL LIBRARY
+from core.Distribution import TanhGaussianPolicy
+from core.Network import MLP
 
 
 def get_probabilistic_num_min(num_mins):
@@ -62,11 +64,11 @@ class DroQSACAgent(object):
         self.policy_net = TanhGaussianPolicy(obs_dim, act_dim, config.hidden_sizes).to(config.device)
         self.q_net_list, self.q_target_net_list = [], []
         for q_i in range(config.num_Q):
-            # new_q_net = Mlp(obs_dim + act_dim, 1, hidden_sizes).to(device)
-            new_q_net = Mlp(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
+            # new_q_net = MLP(obs_dim + act_dim, 1, hidden_sizes).to(device)
+            new_q_net = MLP(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
             self.q_net_list.append(new_q_net)
-            # new_q_target_net = Mlp(obs_dim + act_dim, 1, hidden_sizes).to(device)
-            new_q_target_net = Mlp(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
+            # new_q_target_net = MLP(obs_dim + act_dim, 1, hidden_sizes).to(device)
+            new_q_target_net = MLP(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
             new_q_target_net.load_state_dict(new_q_net.state_dict())
             self.q_target_net_list.append(new_q_target_net)
         # set up optimizers
