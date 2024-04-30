@@ -1,5 +1,4 @@
 # OPEN-SOURCE LIBRARY
-import os
 import tyro
 import time
 import wandb
@@ -10,8 +9,8 @@ from pathlib import Path
 from typing import Optional, Tuple
 import dm_env_wrappers as wrappers
 from dataclasses import dataclass, asdict
-from robopianist.robopianist import suite
-import robopianist.robopianist.wrappers as robopianist_wrappers
+from robopianist import suite
+import robopianist.wrappers as robopianist_wrappers # type:ignore
 
 # LOCAL LIBRARY
 from core import ReplayBuffer

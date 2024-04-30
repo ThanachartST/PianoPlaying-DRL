@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONPATH="$PWD/robopianist"
+
 WANDB_DIR=/tmp/robopianist/ MUJOCO_GL=egl XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DEVICES=0 MUJOCO_EGL_DEVICE_ID=0 python train.py \
     --root-dir /tmp/robopianist/rl/ \
     --warmstart-steps 5000 \
@@ -7,7 +9,7 @@ WANDB_DIR=/tmp/robopianist/ MUJOCO_GL=egl XLA_PYTHON_CLIENT_PREALLOCATE=false CU
     --discount 0.8 \
     --agent-config.critic-dropout-rate 0.01 \
     --agent-config.critic-layer-norm \
-    --agent-config.hidden-dims 256 256 256 \
+    --agent-config.hidden-sizes 256 256 256 \
     --trim-silence \
     --gravity-compensation \
     --reduced-action-space \

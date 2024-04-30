@@ -5,7 +5,7 @@ from torch.nn import functional as F
 from torch.distributions import Distribution, Normal
 
 # LOCAL LIBRARY
-from Network import MLP
+from core.Network import MLP
 
 # following SAC authors' and OpenAI implementation
 LOG_SIG_MAX = 2
