@@ -26,7 +26,7 @@ def get_probabilistic_num_min(num_mins):
     
 @dataclass(frozen=True)
 class DroQSACConfig:
-    """Configuration options for SAC."""
+    '''Configuration options for SAC.'''
 
     num_Q: int = 2
     actor_lr: float = 3e-4
@@ -46,14 +46,14 @@ class DroQSACConfig:
     device: str = 'cuda'
 
 class DroQSACAgent(object):
-    """
+    '''
     Naive SAC: num_Q = 2, num_min = 2
     REDQ: num_Q > 2, num_min = 2
     MaxMin: num_mins = num_Qs
     for above three variants, set q_target_mode to 'min' (default)
     Ensemble Average: set q_target_mode to 'ave'
     REM: set q_target_mode to 'rem'
-    """
+    '''
     def __init__(self, spec, config, gamma=0.99):
         
         act_dim = spec.action.shape[-1]
@@ -121,6 +121,16 @@ class DroQSACAgent(object):
         return action
 
     def eval_actions(self, obs):
+        ''' 
+        Sample actions from the observation provided.
+
+        Args:
+            obs:
+
+        Returns:
+            action:
+        
+        '''
         # given an observation, output a deterministic action in numpy form
         with torch.no_grad():
             obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
