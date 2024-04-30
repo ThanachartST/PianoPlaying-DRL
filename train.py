@@ -1,23 +1,21 @@
-from pathlib import Path
-from typing import Optional, Tuple
+# OPEN-SOURCE LIBRARY
 import tyro
-from dataclasses import dataclass, asdict
-import wandb
 import time
+import wandb
 import random
 import numpy as np
 from tqdm import tqdm
-
-# import sac
-import specs
-# import replay
-
-from robopianist import suite
+from pathlib import Path
+from typing import Optional, Tuple
 import dm_env_wrappers as wrappers
+from dataclasses import dataclass, asdict
+from robopianist.robopianist import suite
 import robopianist.wrappers as robopianist_wrappers
 
+# LOCAL LIBRARY
 from core import ReplayBuffer
-import droq_sac
+from common.EnvironmentSpec import EnvironmentSpec
+from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 
 
 @dataclass(frozen=True)
@@ -60,7 +58,7 @@ class Args:
     record_resolution: Tuple[int, int] = (480, 640)
     camera_id: Optional[str | int] = "piano/back"
     action_reward_observation: bool = False
-    agent_config: droq_sac.DroQSACConfig = droq_sac.DroQSACConfig()
+    agent_config: DroQSACConfig = DroQSACConfig()
 
 
 def prefix_dict(prefix: str, d: dict) -> dict:
@@ -145,21 +143,21 @@ def main(args: Args) -> None:
     env = get_env(args)
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
-    spec = specs.EnvironmentSpec.make(env)
+    spec = EnvironmentSpec.make(env)
 
-    agent = droq_sac.DroQSACAgent(
-        spec=spec,
-        config=args.agent_config,
-        # seed=args.seed,
-        gamma=args.discount,
-    )
+    agent = DroQSACAgent(
+                spec=spec,
+                config=args.agent_config,
+                # seed=args.seed,
+                gamma=args.discount,
+            )
 
     replay_buffer = ReplayBuffer(
-        state_dim=spec.observation_dim,
-        action_dim=spec.action_dim,
-        max_size=args.replay_capacity,
-        batch_size=args.batch_size,
-    )
+                        state_dim=spec.observation_dim,
+                        action_dim=spec.action_dim,
+                        max_size=args.replay_capacity,
+                        batch_size=args.batch_size,
+                    )
 
     timestep = env.reset()
     replay_buffer.insert(timestep, None)
