@@ -101,6 +101,16 @@ class DroQSACAgent(object):
         self.device = config.device
 
     def sample_actions(self, obs):
+        ''' 
+        Sample actions from the observation provided.
+
+        Args:
+            obs:
+
+        Returns:
+            action:
+        
+        '''
         # given an observation, output a sampled action in numpy form
         with torch.no_grad():
             obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
