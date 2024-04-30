@@ -13,7 +13,7 @@ from robopianist import suite
 import robopianist.wrappers as robopianist_wrappers # type:ignore
 
 # LOCAL LIBRARY
-from core import ReplayBuffer
+from core.ReplayBuffer import ReplayBuffer
 from common.EnvironmentSpec import EnvironmentSpec
 from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 
