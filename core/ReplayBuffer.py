@@ -1,9 +1,8 @@
+# OPEN-SOURCE LIBRARY
+import dm_env
 import numpy as np
 from torch import Tensor
-
 from typing import NamedTuple, Optional
-import numpy as np
-import dm_env
 
 
 class Transition(NamedTuple):
