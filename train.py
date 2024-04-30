@@ -1,4 +1,5 @@
 # OPEN-SOURCE LIBRARY
+import os
 import tyro
 import time
 import wandb
@@ -20,6 +21,8 @@ from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 
 @dataclass(frozen=True)
 class Args:
+    # FIXME: change root_dir into os.getcwd()
+    # The current file directory
     root_dir: str = "/tmp/robopianist"
     seed: int = 42
     max_steps: int = 1_000_000
@@ -37,6 +40,7 @@ class Args:
     tags: str = ""
     notes: str = ""
     mode: str = "disabled"
+    #   FIXME: Remove the arguments
     environment_name: str = "RoboPianist-debug-TwinkleTwinkleRousseau-v0"
     n_steps_lookahead: int = 10
     trim_silence: bool = False
@@ -66,6 +70,8 @@ def prefix_dict(prefix: str, d: dict) -> dict:
 
 
 def get_env(args: Args, record_dir: Optional[Path] = None):
+    # FIXME: Change the environment name in Args class into the dir name
+    # using relative path, 
     env = suite.load(
         environment_name=args.environment_name,
         seed=args.seed,
