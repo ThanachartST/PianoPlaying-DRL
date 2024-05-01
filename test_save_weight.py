@@ -4,7 +4,10 @@ from common.EnvironmentSpec import EnvironmentSpec
 import tyro
 import torch
 
-
+#   NOTE: we can save the agent class. However for the purpose 
+#   which checkpoint then resume training process,
+#   The problem is when we stop training and save the agent module
+#       The wandb information did not follow with the saving module.
 def main(args: Args) -> None:
     env = get_env(Args)
     spec = EnvironmentSpec.make(env)
@@ -27,8 +30,6 @@ def main(args: Args) -> None:
     for before_val, after_val in zip( before_remove_statedict.values(), after_remove_statedict.values() ):
         if not torch.equal( before_val, after_val ):
             raise ValueError
-
-
 
 if __name__ == "__main__":
     main(tyro.cli(Args, description=__doc__))
