@@ -8,7 +8,7 @@ LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 ACTION_BOUND_EPSILON = 1E-6
 
-def weights_init_(m):
+def weights_init(m):
     # weight init helper function
     if isinstance(m, nn.Linear):
         torch.nn.init.xavier_uniform_(m.weight, gain=1)
@@ -57,7 +57,7 @@ class MLP(nn.Module):
 
         ## init last fully connected layer with small weight and bias
         self.last_fc_layer = nn.Linear(in_size, output_size)
-        self.apply(weights_init_)
+        self.apply(weights_init)
 
     def forward(self, input):
         h = input

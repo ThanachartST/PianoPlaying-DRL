@@ -95,7 +95,7 @@ class ReplayBuffer:
             device: torch device
         
         Returns:
-            TransitionTensor: NamedTuple 
+            TransitionTensor: NamedTuple object 
                 with keys: [ 'state', 'action', 'reward', 'discount', 'next_state' ]
         '''
         
