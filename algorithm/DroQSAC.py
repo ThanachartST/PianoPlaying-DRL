@@ -117,10 +117,10 @@ class DroQSACAgent(object):
         Sample actions from the given observation for training.
 
         Args:
-            obs: Observation in array form with shape (observation dimension)
+            obs: Observation in array form with shape (obs_dim)
 
         Returns:
-            action: Action in array form with shape (action dimension)
+            action: Action in array form with shape (action_dim)
         
         '''
         # given an observation, output a sampled action in numpy form
@@ -141,10 +141,10 @@ class DroQSACAgent(object):
         Sample deterministic actions from the given observation for evalution.
 
         Args:
-            obs: Observation in array form with shape (observation dimension)
+            obs: Observation in array form with shape (obs_dim)
 
         Returns:
-            action: Action in array form with shape (action dimension)
+            action: Action in array form with shape (action_dim)
         
         '''
         # given an observation, output a deterministic action in numpy form
@@ -167,7 +167,7 @@ class DroQSACAgent(object):
         Compute Q target.
 
         Args:
-            obs_next_tensor: Observation in the next timestep in Tensor form with shape (batch size, observation dimension)
+            obs_next_tensor: Observation in the next timestep in Tensor form with shape (batch size, obs_dim)
             rews_tensor: Reward in Tensor form with shape (batch size)
             done: bool whether an episode ends or not
 
