@@ -24,7 +24,7 @@ class Args:
     # FIXME: change root_dir into os.getcwd()
     # The current file directory
     root_dir: str = os.path.join(os.getcwd(), 'log' )                           # directory for saving training details
-    midi_path: str = None                                                       # path to midi file (.proto)
+    midi_path: Optional[Path] = None                                                       # path to midi file (.proto)
     seed: int = 42                                                              
     total_steps: int = 1_000_000                                                # total timesteps
     warmup_steps: int = 5_000                                                   # warmup timesteps
