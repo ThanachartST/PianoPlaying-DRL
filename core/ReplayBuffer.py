@@ -21,13 +21,20 @@ class TransitionTensor(NamedTuple):
 
 
 class ReplayBuffer:
-    def __init__(
-        self,
-        state_dim: int,
-        action_dim: int,
-        max_size: int,
-        batch_size: int,
-    ) -> None:
+    def __init__(self,
+                 state_dim: int,
+                 action_dim: int,
+                 max_size: int,
+                 batch_size: int) -> None:
+        '''
+        Initial ReplayBuffer object by declare the necessary variable
+
+        Args:
+            state_dim: the dimension of state space
+            action_dim: the dimension of action space
+            max_size: the maximum number of declare buffer
+            batch_size: the number determine the size of data on samples function 
+        '''
         self._max_size = max_size
         self._batch_size = batch_size
 
@@ -44,11 +51,17 @@ class ReplayBuffer:
         self._action: Optional[np.ndarray] = None
         self._latest: Optional[dm_env.TimeStep] = None
 
-    def insert(
-        self,
-        timestep: dm_env.TimeStep,
-        action: Optional[np.ndarray],
-    ) -> None:
+    def insert(self,
+               timestep: dm_env.TimeStep,
+               action: Optional[np.ndarray]) -> None:
+        '''
+        Insert the environment information and action on current timestep.
+
+        Args:
+            timestep: TimeStep object, contain the environment information
+                ['state', 'next_state', 'reward', 'discount' ]
+
+        '''
         self._prev = self._latest
         self._action = action
         self._latest = timestep
@@ -63,27 +76,42 @@ class ReplayBuffer:
             self._ptr = (self._ptr + 1) % self._max_size
             self._size = min(self._size + 1, self._max_size)
 
-    def sample(self, device):
+    def sample(self, device) -> TransitionTensor:
+        ''' 
+        Samples the state, action, next state, reward, discout factor
+        from the replay buffer. 
+
+        Args:
+            device: torch device
+        
+        Returns:
+            TransitionTensor: NamedTuple 
+                with keys: [ 'state', 'action', 'reward', 'discount', 'next_state' ]
+        '''
+        
+        # Random integer in range [0, self._size], return int array with shape (self._batch_size)
         self._ind = np.random.randint(0, self._size, size=self._batch_size)
-
-        batch = Transition(
-            state=self._states[self._ind],
-            action=self._actions[self._ind],
-            reward=self._rewards[self._ind],
-            discount=self._discounts[self._ind],
-            next_state=self._next_states[self._ind],
-        )
-
+    
         return TransitionTensor(
-            state=Tensor(batch.state).to(device),
-            action=Tensor(batch.action).to(device),
-            reward=Tensor(batch.reward).unsqueeze(1).to(device),
-            discount=Tensor(batch.discount).unsqueeze(1).to(device),
-            next_state=Tensor(batch.next_state).to(device)
+            state = Tensor(self._states[self._ind]).to(device),
+            action = Tensor(self._actions[self._ind]).to(device),
+            reward = Tensor(self._rewards[self._ind]).unsqueeze(1).to(device),
+            discount = Tensor(self._discounts[self._ind]).unsqueeze(1).to(device),
+            next_state = Tensor(self._next_states[self._ind]).to(device)
         )
-
-    def is_ready(self) -> bool:
-        return self._batch_size <= len(self)
-
+    
+    
     def __len__(self) -> int:
+        '''
+        Return the current number of buffer or size. 
+        '''
         return self._size
+
+    @property
+    def is_ready(self) -> bool:
+        ''' 
+        Return true, if the samples in replay buffer
+        more than batch size
+        '''
+        
+        return self._batch_size <= len(self)
