@@ -35,18 +35,26 @@ class ReplayBuffer:
             max_size: the maximum number of declare buffer
             batch_size: the number determine the size of data on samples function 
         '''
+
+        # Determine the maximum size of ReplayBuffer
         self._max_size = max_size
+
+        # The size for samples data  
         self._batch_size = batch_size
 
-        # Storage.
+        # Decalre the array that store, state, action, next_state, reward, discount_factors
         self._states = np.zeros((max_size, state_dim), dtype=np.float32)
         self._actions = np.zeros((max_size, action_dim), dtype=np.float32)
         self._next_states = np.zeros((max_size, state_dim), dtype=np.float32)
         self._rewards = np.zeros((max_size), dtype=np.float32)
         self._discounts = np.zeros((max_size), dtype=np.float32)
 
+        # The pointer pointing to the index of the current index
         self._ptr: int = 0
+        # The current size of ReplayBuffer
         self._size: int = 0
+
+        # Initialize the information variable with None
         self._prev: Optional[dm_env.TimeStep] = None
         self._action: Optional[np.ndarray] = None
         self._latest: Optional[dm_env.TimeStep] = None
@@ -67,12 +75,14 @@ class ReplayBuffer:
         self._latest = timestep
 
         if action is not None:
+            # Store the information state, action, next_state, reward, discount_factors
             self._states[self._ptr] = self._prev.observation  # type: ignore
             self._actions[self._ptr] = action
             self._next_states[self._ptr] = self._latest.observation
             self._rewards[self._ptr] = self._latest.reward
             self._discounts[self._ptr] = self._latest.discount
 
+            # Update pointer and current size
             self._ptr = (self._ptr + 1) % self._max_size
             self._size = min(self._size + 1, self._max_size)
 
