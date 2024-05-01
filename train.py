@@ -187,7 +187,7 @@ def main(args: Args) -> None:
 
         # Train.
         if i >= args.warmstart_steps:
-            if replay_buffer.is_ready():
+            if replay_buffer.is_ready:
                 transitions = replay_buffer.sample(agent.device)
                 agent, metrics = agent.update(transitions)
                 if i % args.log_interval == 0:
