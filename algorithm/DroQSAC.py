@@ -252,7 +252,7 @@ class DroQSACAgent(object):
             transitions: Transition object with keys ['state', 'action', 'reward', 'discount', 'next_state']
 
         Returns:
-            dict of policy loss and entropy
+            Dict containing policy loss and entropy
 
         '''
         # sample action from the given observation
@@ -289,7 +289,7 @@ class DroQSACAgent(object):
             transitions: Transition object with keys ['state', 'action', 'reward', 'discount', 'next_state']
 
         Returns:
-            dict of Q losses from all Q networks
+            Dict containing Q losses from all Q networks
 
         '''
         # compute Q target values from the given observation in the next timestpes and reward
@@ -323,7 +323,7 @@ class DroQSACAgent(object):
             entropy: Entropy
 
         Returns:
-            dict of temperature loss (alpha_loss)
+            Dict containing temperature loss (alpha_loss)
 
         '''
         if self.auto_alpha:
@@ -349,7 +349,7 @@ class DroQSACAgent(object):
 
         Returns:
             new_agent: DroQSACAgent object
-            dict: temperature loss (alpha_loss)
+            Dict: containing temperature loss (alpha_loss)
 
         '''
         new_agent = self

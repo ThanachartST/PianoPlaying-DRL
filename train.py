@@ -24,9 +24,10 @@ class Args:
     # FIXME: change root_dir into os.getcwd()
     # The current file directory
     root_dir: str = os.path.join(os.getcwd(), 'log' )                           # directory for saving training details
+    midi_path: str = None                                                       # path to midi file (.proto)
     seed: int = 42                                                              
-    max_steps: int = 1_000_000                                                  # max timesteps
-    warmstart_steps: int = 5_000                                                # warmup timesteps
+    total_steps: int = 1_000_000                                                # total timesteps
+    warmup_steps: int = 5_000                                                   # warmup timesteps
     log_interval: int = 1_000                                                   # time interval for logging training details
     eval_interval: int = 10_000                                                 # time interval for evaluation
     eval_episodes: int = 1                                                      # number of episodes for evaluation
@@ -64,15 +65,28 @@ class Args:
     agent_config: DroQSACConfig = DroQSACConfig()
 
 
-def prefix_dict(prefix: str, d: dict) -> dict:
+def prefix_dict(prefix: str, 
+                d: dict) -> dict:
     return {f"{prefix}/{k}": v for k, v in d.items()}
 
 
-def get_env(args: Args, record_dir: Optional[Path] = None):
-    # FIXME: Change the environment name in Args class into the dir name
-    # using relative path, 
+def get_env(args: Args, 
+            record_dir: Optional[Path] = None):
+    '''    
+    Initialize playing-piano environment.
+
+    Args:
+        args: Args object containg environment, agent and wandb configuration
+        record_dir: Directory for saving recorded video
+
+    Returns:
+        env: Environment object
+
+    '''
+    # set up environment
     env = suite.load(
         environment_name=args.environment_name,
+        midi_file=args.midi_path,
         seed=args.seed,
         stretch=args.stretch_factor,
         shift=args.shift_factor,
@@ -135,6 +149,7 @@ def main(args: Args) -> None:
     random.seed(args.seed)
     np.random.seed(args.seed)
 
+    # initialize wandb
     wandb.init(
         project=args.project,
         entity=args.entity or None,
@@ -145,18 +160,20 @@ def main(args: Args) -> None:
         name=run_name,
     )
 
+    # initialize environment
     env = get_env(args)
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
     spec = EnvironmentSpec.make(env)
 
+    # initialize agent
     agent = DroQSACAgent(
                 spec=spec,
                 config=args.agent_config,
-                # seed=args.seed,
                 gamma=args.discount,
             )
 
+    # initialize replay buffer
     replay_buffer = ReplayBuffer(
                         state_dim=spec.observation_dim,
                         action_dim=spec.action_dim,
@@ -164,36 +181,41 @@ def main(args: Args) -> None:
                         batch_size=args.batch_size,
                     )
 
+    # reset environment
     timestep = env.reset()
     replay_buffer.insert(timestep, None)
 
     start_time = time.time()
-    for i in tqdm(range(1, args.max_steps + 1), disable=not args.tqdm_bar):
-        # Act.
-        if i < args.warmstart_steps:
+    for i in tqdm(range(1, args.total_steps + 1), disable=not args.tqdm_bar):
+        # sample action
+        if i < args.warmup_steps:
             action = spec.sample_action(random_state=env.random_state)
         else:
             action = agent.sample_actions(timestep.observation)
 
-        # Observe.
+        # apply acction to environment
         timestep = env.step(action)
+
+        # store timestep tp replay buffer
         replay_buffer.insert(timestep, action)
 
-        # Reset episode.
+        # reset environment if the episode ends
         if timestep.last():
             wandb.log(prefix_dict("train", env.get_statistics()), step=i)
             timestep = env.reset()
             replay_buffer.insert(timestep, None)
 
-        # Train.
-        if i >= args.warmstart_steps:
+        # train an agent
+        if i >= args.warmup_steps:
             if replay_buffer.is_ready:
+                # sample batch from replay buffer
                 transitions = replay_buffer.sample(agent.device)
+                # update an agent
                 agent, metrics = agent.update(transitions)
                 if i % args.log_interval == 0:
                     wandb.log(prefix_dict("train", metrics), step=i)
 
-        # Eval.
+        # evaluate an agent
         if i % args.eval_interval == 0:
             for _ in range(args.eval_episodes):
                 timestep = eval_env.reset()
