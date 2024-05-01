@@ -156,16 +156,6 @@ class DroQSACAgent(object):
 
         return action
 
-    # def get_ave_q_prediction_for_bias_evaluation(self, obs_tensor, acts_tensor):
-    #     # given obs_tensor and act_tensor, output Q prediction
-    #     q_prediction_list = []
-    #     for q_i in range(self.num_Q):
-    #         q_prediction = self.q_net_list[q_i](torch.cat([obs_tensor, acts_tensor], 1))
-    #         q_prediction_list.append(q_prediction)
-    #     q_prediction_cat = torch.cat(q_prediction_list, dim=1)
-    #     average_q_prediction = torch.mean(q_prediction_cat, dim=1)
-    #     return average_q_prediction
-
     def get_droq_q_target_no_grad(self, obs_next_tensor, rews_tensor, done):
         ''' 
         Compute Q target.
