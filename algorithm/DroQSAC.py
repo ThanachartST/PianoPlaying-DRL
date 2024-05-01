@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional, Sequence
 # LOCAL LIBRARY
 from core.Distribution import TanhGaussianPolicy
 from core.Network import MLP
+from core.ReplayBuffer import Transition
 from common.EnvironmentSpec import EnvironmentSpec
 
     
@@ -46,7 +47,7 @@ class DroQSACAgent(object):
     def __init__(self, 
                  spec: EnvironmentSpec, 
                  config: DroQSACConfig, 
-                 gamma=0.99):
+                 gamma = 0.99):
         ''' 
         Initialize DroQ agent.
 
@@ -110,7 +111,8 @@ class DroQSACAgent(object):
         self.q_target_mode = config.q_target_mode
         self.device = config.device
 
-    def sample_actions(self, obs):
+    def sample_actions(self, 
+                       obs: Any):
         ''' 
         Sample actions from the given observation for training.
 
@@ -133,7 +135,8 @@ class DroQSACAgent(object):
 
         return action
 
-    def eval_actions(self, obs):
+    def eval_actions(self, 
+                     obs: Any):
         ''' 
         Sample deterministic actions from the given observation for evalution.
 
@@ -156,7 +159,10 @@ class DroQSACAgent(object):
 
         return action
 
-    def get_droq_q_target_no_grad(self, obs_next_tensor, rews_tensor, done):
+    def get_droq_q_target_no_grad(self, 
+                                  obs_next_tensor: Tensor, 
+                                  rews_tensor: Tensor, 
+                                  done: bool):
         ''' 
         Compute Q target.
 
@@ -237,7 +243,8 @@ class DroQSACAgent(object):
         for model1_param, model2_param in zip(model1.parameters(), model2.parameters()):
             model1_param.data.copy_(rho*model1_param.data + (1-rho)*model2_param.data)
 
-    def update_actor(self, transitions):
+    def update_actor(self, 
+                     transitions: Transition):
         ''' 
         Update actor or policy network.
 
@@ -273,7 +280,8 @@ class DroQSACAgent(object):
 
         return {"policy_loss": policy_loss, "entropy": -log_prob_a_tilda.mean()}
 
-    def update_critic(self, transitions):
+    def update_critic(self, 
+                      transitions: Transition):
         ''' 
         Update critic or Q networks.
 
@@ -306,7 +314,8 @@ class DroQSACAgent(object):
         
         return {"q_loss_all": q_loss_all}  
 
-    def update_temperature(self, entropy):
+    def update_temperature(self, 
+                           entropy: float):
         ''' 
         Update temperature.
 
@@ -330,7 +339,8 @@ class DroQSACAgent(object):
 
         return {"alpha_loss": alpha_loss}
 
-    def update(self, transitions):
+    def update(self, 
+               transitions: Transition):
         ''' 
         Update agent (actor, critic, temperature).
 

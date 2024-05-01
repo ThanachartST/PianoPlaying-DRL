@@ -27,7 +27,7 @@ class ReplayBuffer:
                  max_size: int,
                  batch_size: int) -> None:
         '''
-        Initial ReplayBuffer object by declare the necessary variable
+        Initialize ReplayBuffer object by declaring the necessary variable
 
         Args:
             state_dim: the dimension of state space
