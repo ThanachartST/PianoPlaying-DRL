@@ -1,8 +1,8 @@
 # OPEN-SOURCE LIBRARY
 import torch
 import torch.nn as nn
+from typing import Sequence, Any
 from torch.nn import functional as F
-from typing import Sequence,Any
 
 # following SAC authors' and OpenAI implementation
 LOG_SIG_MAX = 2
