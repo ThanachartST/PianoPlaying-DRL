@@ -1,4 +1,5 @@
 # OPEN-SOURCE LIBRARY
+import os
 import tyro
 import time
 import wandb
@@ -22,27 +23,26 @@ from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 class Args:
     # FIXME: change root_dir into os.getcwd()
     # The current file directory
-    root_dir: str = "/tmp/robopianist"
-    seed: int = 42
-    max_steps: int = 1_000_000
-    warmstart_steps: int = 5_000
-    log_interval: int = 1_000
-    eval_interval: int = 10_000
-    eval_episodes: int = 1
-    batch_size: int = 256
-    discount: float = 0.99
-    tqdm_bar: bool = True #False
-    replay_capacity: int = 1_000_000
-    project: str = "robopianist"
-    entity: str = ""
-    name: str = ""
-    tags: str = ""
-    notes: str = ""
-    mode: str = "disabled"
-    #   FIXME: Remove the arguments
-    environment_name: str = "RoboPianist-debug-TwinkleTwinkleRousseau-v0"
-    n_steps_lookahead: int = 10
-    trim_silence: bool = False
+    root_dir: str = os.path.join(os.getcwd(), 'log' )                           # directory for saving training details
+    seed: int = 42                                                              
+    max_steps: int = 1_000_000                                                  # max timesteps
+    warmstart_steps: int = 5_000                                                # warmup timesteps
+    log_interval: int = 1_000                                                   # time interval for logging training details
+    eval_interval: int = 10_000                                                 # time interval for evaluation
+    eval_episodes: int = 1                                                      # number of episodes for evaluation
+    batch_size: int = 256                                                       
+    discount: float = 0.99                                                      # discount factor
+    tqdm_bar: bool = True #False                                                 
+    replay_capacity: int = 1_000_000                                            # capacity of replay buffer
+    project: str = "robopianist"                                                # wandb project name
+    entity: str = ""                                                            # wandb entity    
+    name: str = ""                                                              # wandb name
+    tags: str = ""                                                              # wandb tags    
+    notes: str = ""                                                             # wandb notes
+    mode: str = "disabled"                                                      # wandb mode
+    environment_name: str = "RoboPianist-debug-TwinkleTwinkleRousseau-v0"       # folder name for saving training details   
+    n_steps_lookahead: int = 10                                                 
+    trim_silence: bool = False                                                  
     gravity_compensation: bool = False
     reduced_action_space: bool = False
     control_timestep: float = 0.05

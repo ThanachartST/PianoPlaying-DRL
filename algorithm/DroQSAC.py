@@ -102,13 +102,13 @@ class DroQSACAgent(object):
 
     def sample_actions(self, obs):
         ''' 
-        Sample actions from the observation provided.
+        Sample actions from the given observation for training.
 
         Args:
-            obs:
+            obs: array with shape (observation dimension,)
 
         Returns:
-            action:
+            action: array with shape (action dimension,)
         
         '''
         # given an observation, output a sampled action in numpy form
@@ -122,13 +122,13 @@ class DroQSACAgent(object):
 
     def eval_actions(self, obs):
         ''' 
-        Sample actions from the observation provided.
+        Sample deterministic actions from the given observation for evalution.
 
         Args:
-            obs:
+            obs: array with shape (observation dimension,)
 
         Returns:
-            action:
+            action: array with shape (action dimension,)
         
         '''
         # given an observation, output a deterministic action in numpy form
@@ -159,6 +159,19 @@ class DroQSACAgent(object):
         return average_q_prediction
 
     def get_droq_q_target_no_grad(self, obs_next_tensor, rews_tensor, done_tensor):
+        ''' 
+        Comput q target for training.
+
+        Args:
+            obs_next_tensor:
+            rews_tensor: 
+            done_tensor:
+
+        Returns:
+            y_q:
+            sample_idxs: 
+        
+        '''
         # compute REDQ Q target, depending on the agent's Q target mode
         # allow min as a float:
         num_mins_to_use = get_probabilistic_num_min(self.num_min_Q)
