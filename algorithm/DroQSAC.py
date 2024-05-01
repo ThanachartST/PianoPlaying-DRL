@@ -156,15 +156,6 @@ class DroQSACAgent(object):
 
         return action
 
-    # def sample_actions_and_logprob_for_bias_evaluation(self, obs): #TODO modify the readme here
-    #     # given an observation, output a sampled action in numpy form
-    #     with torch.no_grad():
-    #         obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
-    #         action_tensor, _, _, log_prob_a_tilda, _, _, = self.policy_net.forward(obs_tensor, deterministic=False,
-    #                                      return_log_prob=True)
-    #         action = action_tensor.cpu().numpy().reshape(-1)
-    #     return action, log_prob_a_tilda
-
     # def get_ave_q_prediction_for_bias_evaluation(self, obs_tensor, acts_tensor):
     #     # given obs_tensor and act_tensor, output Q prediction
     #     q_prediction_list = []
