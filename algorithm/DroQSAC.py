@@ -330,16 +330,15 @@ class DroQSACAgent(object):
             Dict: containing temperature loss (alpha_loss)
 
         '''
-        new_agent = self
         # Update critic
-        critic_info = new_agent.update_critic(transitions)
+        critic_info = self.update_critic(transitions)
         # Update actor
-        actor_info = new_agent.update_actor(transitions)
+        actor_info = self.update_actor(transitions)
         # Update temperature
-        temp_info = new_agent.update_temperature(actor_info["batch_entropy"])
+        temp_info = self.update_temperature(actor_info["batch_entropy"])
 
         # Update Q target networks
         for q_i in range(self.num_Q):
             self.soft_update_model1_with_model2(self.q_target_net_list[q_i], self.q_net_list[q_i], self.rho)
 
-        return new_agent, {**actor_info, **critic_info, **temp_info}       
+        return {**actor_info, **critic_info, **temp_info}       

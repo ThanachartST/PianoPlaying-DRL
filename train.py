@@ -211,7 +211,7 @@ def main(args: Args) -> None:
                 # sample batch from replay buffer
                 transitions = replay_buffer.sample(agent.device)
                 # update an agent
-                agent, metrics = agent.update(transitions)
+                metrics = agent.update(transitions)
                 if i % args.log_interval == 0:
                     wandb.log(prefix_dict("train", metrics), step=i)
 
