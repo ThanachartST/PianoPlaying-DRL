@@ -4,7 +4,7 @@ export PYTHONPATH="$PWD/robopianist"
 
 WANDB_DIR=/tmp/robopianist/ MUJOCO_GL=egl XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DEVICES=0 MUJOCO_EGL_DEVICE_ID=0 python train.py \
     --root-dir /tmp/robopianist/rl/ \
-    --warmup-steps 500 \
+    --warmup-steps 5000 \
     --total-steps 300000 \
     --discount 0.8 \
     --agent-config.critic-dropout-rate 0.01 \
