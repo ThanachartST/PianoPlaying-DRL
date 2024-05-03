@@ -256,7 +256,7 @@ class DroQSACAgent(object):
         for sample_idx in range(self.num_Q):
             self.q_net_list[sample_idx].requires_grad_(True)
 
-        return {"policy_loss": policy_loss, "batch_entropy": log_prob_a_tilda}
+        return {"policy_loss": policy_loss, "batch_entropy": -log_prob_a_tilda}
 
     def update_critic(self, 
                       transitions: Transition):
@@ -306,7 +306,7 @@ class DroQSACAgent(object):
         '''
         if self.auto_alpha:
             # Compute temperature loss
-            alpha_loss = -(self.log_alpha * (batch_entropy + self.target_entropy).detach()).mean()
+            alpha_loss = (self.log_alpha * (batch_entropy - self.target_entropy).detach()).mean()
             # Update temperature
             self.alpha_optim.zero_grad()
             alpha_loss.backward()
