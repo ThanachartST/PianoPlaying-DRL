@@ -8,6 +8,11 @@ import torch
 #   which checkpoint then resume training process,
 #   The problem is when we stop training and save the agent module
 #       The wandb information did not follow with the saving module.
+#       To overcome this problem, we need to save the "run_name" variable 
+#       from the last experiment then add into CLI arguments 
+#   TODO: Add arguments in Args class, "saved_weight_path" this path will have the format as follow
+#       <run_name>.pt || run_name -> f"SAC-{args.environment_name}-{args.seed}-{time.time()}"
+#       using the run_name for args.name instead the empty string
 def main(args: Args) -> None:
     env = get_env(Args)
     spec = EnvironmentSpec.make(env)

@@ -156,7 +156,7 @@ def main(args: Args) -> None:
         tags=(args.tags.split(",") if args.tags else []),
         notes=args.notes or None,
         config=asdict(args),
-        mode=args.mode,
+        # mode=args.mode,
         name=run_name,
     )
 
@@ -223,6 +223,10 @@ def main(args: Args) -> None:
                     timestep = eval_env.step(agent.eval_actions(timestep.observation))
             log_dict = prefix_dict("eval", eval_env.get_statistics())
             music_dict = prefix_dict("eval", eval_env.get_musical_metrics())
+            # Print information every evaluation steps
+            print( log_dict.items() )
+            print( music_dict.items() )
+            
             wandb.log(log_dict | music_dict, step=i)
             video = wandb.Video(str(eval_env.latest_filename), fps=4, format="mp4")
             wandb.log({"video": video, "global_step": i})

@@ -16,24 +16,24 @@ from common.EnvironmentSpec import EnvironmentSpec
     
 @dataclass(frozen=True)
 class DroQSACConfig:
-    '''Configuration options for SAC.'''
+    '''Configuration options for DroQSAC.'''
 
-    num_Q: int = 2
-    actor_lr: float = 3e-4
-    critic_lr: float = 3e-4
-    temp_lr: float = 3e-4
-    hidden_sizes: Sequence[int] = (256, 256, 256)
-    activation: str = "gelu"
-    num_min_Q: Optional[int] = 2
-    critic_dropout_rate: float = 0.0
-    critic_layer_norm: bool = True
-    rho: float = 0.005
-    target_entropy: Optional[float] = None
-    init_temperature: float = 1.0
-    backup_entropy: bool = True
-    q_target_mode: str = 'min'
-    auto_alpha: bool = True
-    device: str = 'cuda'
+    num_Q: int = 2                                      # Number of ensemble of Q-functions 
+    actor_lr: float = 3e-4                              # Learning rate of actor
+    critic_lr: float = 3e-4                             # Learning rate of critc
+    temp_lr: float = 3e-4                               # Learning rate of temperature (alpha)
+    hidden_sizes: Sequence[int] = (256, 256, 256)       # Networks hidden sizes
+    activation: str = "gelu"                            # Networks activation function
+    num_min_Q: Optional[int] = 2                        # Number of ensemble for clipping Q-functions
+    critic_dropout_rate: float = 0.0                    # Dropout rate in dropout layer on critic
+    critic_layer_norm: bool = True                      # Flag: Apply layer norm in Q-networks
+    rho: float = 0.005                                  # Hyperparameters for scaling in updating target Q-Networks params
+    target_entropy: Optional[float] = None              # The target entropy using for calculating alpha loss
+    init_temperature: float = 1.0                       # Initial values of temperture (alpha)
+    backup_entropy: bool = True                         # FIXME: Not use
+    q_target_mode: str = 'min'                          # FIXME: Not use, DroQ algorithm always use minimum Q-Networks
+    auto_alpha: bool = True                             # Flag for the auto update temperature (alpha)
+    device: str = 'cuda'                                # Processing device, default='cuda'
 
 class DroQSACAgent(object):
     '''
@@ -47,7 +47,7 @@ class DroQSACAgent(object):
     def __init__(self, 
                  spec: EnvironmentSpec, 
                  config: DroQSACConfig, 
-                 gamma = 0.99):
+                 gamma: float = 0.99):
         ''' 
         Initialize DroQ agent.
 
@@ -57,36 +57,36 @@ class DroQSACAgent(object):
             gamma: Discount factor
 
         '''
-        # action and observation dimensions
+        # Action and observation dimensions
         act_dim = spec.action.shape[-1]
         obs_dim = spec.observation.shape[-1]
 
-        # temperater
+        # Intitializa temperater
         alpha = config.init_temperature
 
-        # set up policy network
+        # Set up policy network
         self.policy_net = TanhGaussianPolicy(obs_dim, act_dim, config.hidden_sizes).to(config.device)
 
-        # set up q networks
+        # Set up q networks
         self.q_net_list, self.q_target_net_list = [], []
         for q_i in range(config.num_Q):
-            # new_q_net = MLP(obs_dim + act_dim, 1, hidden_sizes).to(device)
+            # Declare Q-networks
             new_q_net = MLP(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
             self.q_net_list.append(new_q_net)
-            # new_q_target_net = MLP(obs_dim + act_dim, 1, hidden_sizes).to(device)
+            # Decalre target Q-networks, load the same parameters as main Q-netwokrs
             new_q_target_net = MLP(obs_dim + act_dim, 1, config.hidden_sizes, target_drop_rate=config.critic_dropout_rate, layer_norm=config.critic_layer_norm).to(config.device)
             new_q_target_net.load_state_dict(new_q_net.state_dict())
             self.q_target_net_list.append(new_q_target_net)
 
-        # set up policy optimizer
+        # Set up policy optimizer
         self.policy_optimizer = optim.Adam(self.policy_net.parameters(), lr=config.actor_lr)
 
-        # set up q optimizer
+        # Set up Q-function optimizer
         self.q_optimizer_list = []
         for q_i in range(config.num_Q):
             self.q_optimizer_list.append(optim.Adam(self.q_net_list[q_i].parameters(), lr=config.critic_lr))
 
-        # set up adaptive entropy (SAC adaptive)
+        # Set up adaptive entropy (SAC adaptive)
         self.auto_alpha = config.auto_alpha
         if config.auto_alpha:
             self.target_entropy = config.target_entropy or -0.5 * act_dim
@@ -98,12 +98,10 @@ class DroQSACAgent(object):
             self.alpha = alpha
             self.target_entropy, self.log_alpha, self.alpha_optim = None, None, None
 
-        # set up replay buffer
-        # self.replay_buffer = ReplayBuffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
-        # set up other things
+        # Declare L2 norm function
         self.mse_criterion = nn.MSELoss()
 
-        # store other parameters
+        # Store hyperparameters
         self.gamma = gamma
         self.rho = config.rho
         self.num_min_Q = config.num_min_Q
@@ -123,14 +121,14 @@ class DroQSACAgent(object):
             action: Action in array form with shape (action_dim)
         
         '''
-        # given an observation, output a sampled action in numpy form
+        # Given an observation, output a sampled action in numpy form
         with torch.no_grad():
-            # convert observation in array form to Tensor form
+            # Convert observation in array form to Tensor form
             obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
-            # sample action in Tensor form
+            # Sample action in Tensor form
             action_tensor = self.policy_net.forward(obs_tensor, deterministic=False,
                                             return_log_prob=False)[0]
-            # convert action in Tensor form to array form
+            # Convert action in Tensor form to array form
             action = action_tensor.cpu().numpy().reshape(-1)
 
         return action
@@ -147,28 +145,28 @@ class DroQSACAgent(object):
             action: Action in array form with shape (action_dim)
         
         '''
-        # given an observation, output a deterministic action in numpy form
+        # Given an observation, output a deterministic action in numpy form
         with torch.no_grad():
-            # convert observation in array form to Tensor form
+            # Convert observation in array form to Tensor form
             obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
-            # sample action in Tensor form
+            # Sample action in Tensor form
             action_tensor = self.policy_net.forward(obs_tensor, deterministic=True,
                                          return_log_prob=False)[0]
-            # convert action in Tensor form to array form
+            # Convert action in Tensor form to array form
             action = action_tensor.cpu().numpy().reshape(-1)
 
         return action
 
     def get_droq_q_target_no_grad(self, 
-                                  obs_next_tensor: Tensor, 
-                                  rews_tensor: Tensor, 
+                                  next_obs_tensor: Tensor, 
+                                  reward_tensor: Tensor, 
                                   done: bool):
         ''' 
         Compute Q target.
 
         Args:
-            obs_next_tensor: Observation in the next timestep in Tensor form with shape (batch size, obs_dim)
-            rews_tensor: Reward in Tensor form with shape (batch size)
+            next_obs_tensor: Observation in the next timestep in Tensor form with shape (batch size, obs_dim)
+            reward_tensor: Reward in Tensor form with shape (batch size)
             done: bool whether an episode ends or not
 
         Returns:
@@ -180,53 +178,28 @@ class DroQSACAgent(object):
         # num_mins_to_use = get_probabilistic_num_min(self.num_min_Q)
         # sample_idxs = np.random.choice(self.num_Q, num_mins_to_use, replace=False)
 
-        # compute Q target value
+        # Compute Q target value
         with torch.no_grad():
             if self.q_target_mode == 'min':
                 '''Q target value is computed by min of a subset of Q values'''
-                # sample action from given observation in the next timestep
-                a_tilda_next, _, _, log_prob_a_tilda_next, _, _ = self.policy_net.forward(obs_next_tensor)
+                # Sample action from given observation in the next timestep
+                a_tilda_next, _, _, log_prob_a_tilda_next, _, _ = self.policy_net.forward(next_obs_tensor)
 
-                # compute Q values in the next timestep
+                # Compute Q values in the next timestep
                 q_prediction_next_list = []
                 for sample_idx in range(self.num_Q):
-                    q_prediction_next = self.q_target_net_list[sample_idx](torch.cat([obs_next_tensor, a_tilda_next], 1))
+                    q_prediction_next = self.q_target_net_list[sample_idx](torch.cat([next_obs_tensor, a_tilda_next], 1))
                     q_prediction_next_list.append(q_prediction_next)
+                
+                # Concat predicted Q-values.
+                # Then, find minimum Q value from all Q values in the next timestep 
                 q_prediction_next_cat = torch.cat(q_prediction_next_list, 1)
-                # find minimum Q value from all Q values in the next timestep 
                 min_q, min_indices = torch.min(q_prediction_next_cat, dim=1, keepdim=True)
 
-                # compute Q target value
-                next_q_with_log_prob = min_q - self.alpha * log_prob_a_tilda_next
-                y_q = rews_tensor + self.gamma * (1 - done) * next_q_with_log_prob
+                # Compute target Q-value
+                next_q_with_log_prob = min_q - (self.alpha * log_prob_a_tilda_next)
+                y_q = reward_tensor + self.gamma * (1 - done) * next_q_with_log_prob
             
-            # if self.q_target_mode == 'ave':
-            #     """Q target is average of all Q values"""
-            #     a_tilda_next, _, _, log_prob_a_tilda_next, _, _ = self.policy_net.forward(obs_next_tensor)
-            #     q_prediction_next_list = []
-            #     for q_i in range(self.num_Q):
-            #         q_prediction_next = self.q_target_net_list[q_i](torch.cat([obs_next_tensor, a_tilda_next], 1))
-            #         q_prediction_next_list.append(q_prediction_next)
-            #     q_prediction_next_ave = torch.cat(q_prediction_next_list, 1).mean(dim=1).reshape(-1, 1)
-            #     next_q_with_log_prob = q_prediction_next_ave - self.alpha * log_prob_a_tilda_next
-            #     y_q = rews_tensor + self.gamma * (1 - done_tensor) * next_q_with_log_prob
-
-            # if self.q_target_mode == 'rem':
-            #     """Q target is random ensemble mixture of Q values"""
-            #     a_tilda_next, _, _, log_prob_a_tilda_next, _, _ = self.policy_net.forward(obs_next_tensor)
-            #     q_prediction_next_list = []
-            #     for q_i in range(self.num_Q):
-            #         q_prediction_next = self.q_target_net_list[q_i](torch.cat([obs_next_tensor, a_tilda_next], 1))
-            #         q_prediction_next_list.append(q_prediction_next)
-            #     # apply rem here
-            #     q_prediction_next_cat = torch.cat(q_prediction_next_list, 1)
-            #     rem_weight = Tensor(np.random.uniform(0, 1, q_prediction_next_cat.shape)).to(device=self.device)
-            #     normalize_sum = rem_weight.sum(1).reshape(-1, 1).expand(-1, self.num_Q)
-            #     rem_weight = rem_weight / normalize_sum
-            #     q_prediction_next_rem = (q_prediction_next_cat * rem_weight).sum(dim=1).reshape(-1, 1)
-            #     next_q_with_log_prob = q_prediction_next_rem - self.alpha * log_prob_a_tilda_next
-            #     y_q = rews_tensor + self.gamma * (1 - done_tensor) * next_q_with_log_prob
-        # return y_q, sample_idxs
         return y_q
     
     def soft_update_model1_with_model2(self, model1, model2, rho):
@@ -255,30 +228,35 @@ class DroQSACAgent(object):
             Dict containing policy loss and entropy
 
         '''
-        # sample action from the given observation
-        a_tilda, mean_a_tilda, log_std_a_tilda, log_prob_a_tilda, _, pretanh = self.policy_net.forward(transitions.state)
+        # Sample aprroximated action from the given observation
+        a_tilda, _, _, log_prob_a_tilda, _, _ = self.policy_net.forward(transitions.state)
 
-        # compute Q values from all Q networks
+        # Compute Q-values from all Q networks
         q_a_tilda_list = []
         for sample_idx in range(self.num_Q):
             self.q_net_list[sample_idx].requires_grad_(False)
             q_a_tilda = self.q_net_list[sample_idx](torch.cat([transitions.state, a_tilda], 1))
             q_a_tilda_list.append(q_a_tilda)
         q_a_tilda_cat = torch.cat(q_a_tilda_list, 1)
-        # find an average of Q values
+
+        # Find an average of Q values from all Q networks
+        # return an array with shape (batch_size, )
         ave_q = torch.mean(q_a_tilda_cat, dim=1, keepdim=True)
 
-        # compute policy loss
-        policy_loss = (self.alpha * log_prob_a_tilda - ave_q).mean()
+        # Compute policy loss, average along batch size
+        policy_loss = ((self.alpha * log_prob_a_tilda) - ave_q).mean()
 
-        # update policy network
+        # Update policy network
         self.policy_optimizer.zero_grad()
         policy_loss.backward()
+        self.policy_optimizer.step()
+
+        # Resume requires_grad = True of Q networks
+        # NOTE: we set requires_grad = False, above
         for sample_idx in range(self.num_Q):
             self.q_net_list[sample_idx].requires_grad_(True)
-        self.policy_optimizer.step() 
 
-        return {"policy_loss": policy_loss, "entropy": -log_prob_a_tilda.mean()}
+        return {"policy_loss": policy_loss, "batch_entropy": log_prob_a_tilda}
 
     def update_critic(self, 
                       transitions: Transition):
@@ -292,20 +270,20 @@ class DroQSACAgent(object):
             Dict containing Q losses from all Q networks
 
         '''
-        # compute Q target values from the given observation in the next timestpes and reward
+        # Compute Q target values from the given observation in the next timestpes and reward
         y_q = self.get_droq_q_target_no_grad(transitions.next_state, transitions.reward, done=0)
 
-        # compute Q values from all Q networks
+        # Compute Q values from all Q networks
         q_prediction_list = []
         for q_i in range(self.num_Q):
             q_prediction = self.q_net_list[q_i](torch.cat([transitions.state, transitions.action], 1))
             q_prediction_list.append(q_prediction)
         q_prediction_cat = torch.cat(q_prediction_list, dim=1)
         y_q = y_q.expand((-1, self.num_Q)) if y_q.shape[1] == 1 else y_q
-        # compute Q losses from all Q networks
+        # Compute Q losses from all Q networks
         q_loss_all = self.mse_criterion(q_prediction_cat, y_q) * self.num_Q
 
-        # update Q networks
+        # Update Q networks
         for q_i in range(self.num_Q):
             self.q_optimizer_list[q_i].zero_grad()
         q_loss_all.backward()
@@ -315,21 +293,21 @@ class DroQSACAgent(object):
         return {"q_loss_all": q_loss_all}  
 
     def update_temperature(self, 
-                           entropy: float):
+                           batch_entropy: Tensor):
         ''' 
         Update temperature.
 
         Args:
-            entropy: Entropy
+            batch_entropy: Entropy tensor with shape (batch_size,)
 
         Returns:
             Dict containing temperature loss (alpha_loss)
 
         '''
         if self.auto_alpha:
-            # compute temperature loss
-            alpha_loss = -(self.log_alpha * (entropy + self.target_entropy).detach()).mean()
-            # update temperature
+            # Compute temperature loss
+            alpha_loss = -(self.log_alpha * (batch_entropy + self.target_entropy).detach()).mean()
+            # Update temperature
             self.alpha_optim.zero_grad()
             alpha_loss.backward()
             self.alpha_optim.step()
@@ -353,14 +331,14 @@ class DroQSACAgent(object):
 
         '''
         new_agent = self
-        # update critic
+        # Update critic
         critic_info = new_agent.update_critic(transitions)
-        # update actor
+        # Update actor
         actor_info = new_agent.update_actor(transitions)
-        # update temperature
-        temp_info = new_agent.update_temperature(actor_info["entropy"])
+        # Update temperature
+        temp_info = new_agent.update_temperature(actor_info["batch_entropy"])
 
-        # update Q target networks
+        # Update Q target networks
         for q_i in range(self.num_Q):
             self.soft_update_model1_with_model2(self.q_target_net_list[q_i], self.q_net_list[q_i], self.rho)
 

@@ -107,7 +107,7 @@ class TanhGaussianPolicy(MLP):
         # Output shape (action_dim, )
         self.last_fc_log_std = nn.Linear(last_hidden_size, action_dim)
         
-        # action limit: for example, humanoid has an action limit of -0.4 to 0.4
+        # The action limit: for example, humanoid has an action limit of -0.4 to 0.4
         self.action_limit = action_limit
 
         # Apply function into nn.Module
@@ -153,8 +153,16 @@ class TanhGaussianPolicy(MLP):
         std = torch.exp(log_std)
 
         # Declare normal distribution object
-        normal_dist = Normal(mean, std)
-        
+        try:
+            normal_dist = Normal(mean, std)
+        except:
+            print( f'\nObservations: {obs}' )
+            print( f'Last hidden output: { h }' )
+            print( f'Mean: { mean }' )
+            print( f'self.last_fc_layer weight: { self.last_fc_layer.state_dict() }')
+            print( f'Std: {std}\n' )
+            raise ValueError()
+
         # Deterministic action, Using on the evaluation taks
         if deterministic:
             pre_tanh_value = mean
@@ -164,15 +172,19 @@ class TanhGaussianPolicy(MLP):
         # sample action from the distribution probability
         else:
             pre_tanh_value = normal_dist.rsample()
+            # print( f'pre_tanh_value shape : { pre_tanh_value.shape }' )
             action = torch.tanh(pre_tanh_value)
+            # print( f'action.shape: { action.shape }' )
 
         # Calculate the log probability of action, if return flag is True
         if return_log_prob:
+            #   Return tensor shape (batch_size, action_dim)
             log_prob = normal_dist.log_prob(pre_tanh_value)
             log_prob -= torch.log(1 - action.pow(2) + ACTION_BOUND_EPSILON)
+            # Sum along action axis,
             log_prob = log_prob.sum(1, keepdim=True)
         
-        # if return flag is False, log_prob will be None
+        # If return flag is False, log_prob will be None
         else:
             log_prob = None
 
