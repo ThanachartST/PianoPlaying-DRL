@@ -19,7 +19,7 @@ class TransitionTensor(NamedTuple):
     discount: Tensor
     next_state: Tensor
 
-
+# FIXME: For RNN Task we need to fixed this ReplayBuffer Class
 class ReplayBuffer:
     def __init__(self,
                  state_dim: int,

@@ -35,6 +35,7 @@ class DroQSACConfig:
     auto_alpha: bool = True                             # Flag for the auto update temperature (alpha)
     device: str = 'cuda'                                # Processing device, default='cuda'
 
+# FIXME: Change the name into something like RecurrentDroQSACAgent
 class DroQSACAgent(object):
     '''
     Naive SAC: num_Q = 2, num_min = 2
@@ -127,7 +128,7 @@ class DroQSACAgent(object):
             obs_tensor = torch.Tensor(obs).unsqueeze(0).to(self.device)
             # Sample action in Tensor form
             action_tensor = self.policy_net.forward(obs_tensor, deterministic=False,
-                                            return_log_prob=False)[0]
+                                                    return_log_prob=False)[0]
             # Convert action in Tensor form to array form
             action = action_tensor.cpu().numpy().reshape(-1)
 

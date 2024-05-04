@@ -124,7 +124,8 @@ def get_env(args: Args,
         env = wrappers.EpisodeStatisticsWrapper(environment=env, deque_size=1)
     if args.action_reward_observation:
         env = wrappers.ObservationActionRewardWrapper(env)
-    env = wrappers.ConcatObservationWrapper(env)
+    # FIXME: This wrappers make the observation come without keys
+    # env = wrappers.ConcatObservationWrapper(env)
     if args.frame_stack > 1:
         env = wrappers.FrameStackingWrapper(
             env, num_frames=args.frame_stack, flatten=True
@@ -156,7 +157,7 @@ def main(args: Args) -> None:
         tags=(args.tags.split(",") if args.tags else []),
         notes=args.notes or None,
         config=asdict(args),
-        # mode=args.mode,
+        mode=args.mode,
         name=run_name,
     )
 
@@ -165,21 +166,18 @@ def main(args: Args) -> None:
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
     spec = EnvironmentSpec.make(env)
+    raise ValueError()
 
     # initialize agent
-    agent = DroQSACAgent(
-                spec=spec,
-                config=args.agent_config,
-                gamma=args.discount,
-            )
+    agent = DroQSACAgent(spec=spec,
+                         config=args.agent_config,
+                         gamma=args.discount)
 
     # initialize replay buffer
-    replay_buffer = ReplayBuffer(
-                        state_dim=spec.observation_dim,
-                        action_dim=spec.action_dim,
-                        max_size=args.replay_capacity,
-                        batch_size=args.batch_size,
-                    )
+    replay_buffer = ReplayBuffer(state_dim=spec.observation_dim,
+                                 action_dim=spec.action_dim,
+                                 max_size=args.replay_capacity,
+                                 batch_size=args.batch_size)
 
     # reset environment
     timestep = env.reset()
