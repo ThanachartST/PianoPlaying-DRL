@@ -19,6 +19,7 @@ class EnvironmentSpec: # FIXME: Change the name of this class
         The previous version using specs.Array, which the minimum and maximum 
         of all action were in range [-1,1], but I realize that some joint 
         was not act like that.
+        NOTE: This issue effect only warmup steps.
         '''
 
         obs_spec = env.observation_spec()
