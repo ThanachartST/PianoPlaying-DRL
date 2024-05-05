@@ -15,7 +15,8 @@ import robopianist.wrappers as robopianist_wrappers # type:ignore
 
 # LOCAL LIBRARY
 from core.ReplayBuffer import ReplayBuffer
-from common.EnvironmentSpec import EnvironmentSpec
+from common.EnvironmentSpec import EnvironmentSpec, TimeseriesEnvironmentSpec
+from common.EnvironmentWrapper import TimeseriesObservationWrapper
 from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 
 
@@ -133,6 +134,7 @@ def get_env(args: Args,
     env = wrappers.CanonicalSpecWrapper(env, clip=args.clip)
     env = wrappers.SinglePrecisionWrapper(env)
     env = wrappers.DmControlWrapper(env)
+    env = TimeseriesObservationWrapper(env)
     return env
 
 
@@ -165,7 +167,7 @@ def main(args: Args) -> None:
     env = get_env(args)
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
-    spec = EnvironmentSpec.make(env)
+    spec = TimeseriesEnvironmentSpec.make(env)
     # raise ValueError()
 
     # initialize agent
