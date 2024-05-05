@@ -166,7 +166,7 @@ def main(args: Args) -> None:
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
     spec = EnvironmentSpec.make(env)
-    raise ValueError()
+    # raise ValueError()
 
     # initialize agent
     agent = DroQSACAgent(spec=spec,
