@@ -169,7 +169,6 @@ def main(args: Args) -> None:
 
     spec = TimeseriesEnvironmentSpec.make(env)
     # raise ValueError()
-
     # initialize agent
     agent = DroQSACAgent(spec=spec,
                          config=args.agent_config,

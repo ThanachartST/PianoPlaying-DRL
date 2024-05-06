@@ -17,9 +17,9 @@ WANDB_DIR=/tmp/robopianist/ MUJOCO_GL=egl XLA_PYTHON_CLIENT_PREALLOCATE=false CU
     --control-timestep 0.05 \
     --n-steps-lookahead 10 \
     --environment-name "RoboPianist-clair_de_lune" \
-    --action-reward-observation \
     --primitive-fingertip-collisions \
     --eval-episodes 1 \
     --camera-id "piano/back" \
     --midi-path "$PWD/robopianist/robopianist/music/data/pig_single_finger/clair_de_lune-1.proto"
+    # --action-reward-observation \
     # --name ""

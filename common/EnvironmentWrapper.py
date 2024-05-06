@@ -6,10 +6,10 @@ import numpy as np
 
 import dm_env
 from dm_env import specs
-from dm_env_wrappers._src.base import EnvironmentWrapper
+from dm_env_wrappers._src import base
 from dm_env_wrappers._src.concatenate_observations import _zeros_like, _concat
 
-class TimeseriesObservationWrapper(EnvironmentWrapper):
+class TimeseriesObservationWrapper(base.EnvironmentWrapper):
     '''
     NOTE: The wrapper using on Robopianist tasks only!!!
     '''
@@ -34,27 +34,24 @@ class TimeseriesObservationWrapper(EnvironmentWrapper):
         timestep = self._environment.reset()
         return timestep._replace(observation=self._convert_observation(timestep.observation))
 
-    # FIXME: OPTIMIZE IT
-    def _convert_observation(self, observation):
+    def _convert_observation(self, observation: dict):
         '''
         Separate the observation into static and sequence observation
         '''
-        _temp_static_obs_dict = {}
-        # New observation dict {obs_name: obs_val}
-        for obs_name, obs_arr in observation.items():
-            
-            # NOTE: I try to find the variable that defined the 'goal' key, but it have not.
-            if obs_name != 'goal':
-                _temp_static_obs_dict[obs_name] = obs_arr
+        if not isinstance(observation, dict):
+            raise TypeError('The observation must be dictionary')
 
-            else:
-                # NOTE: n_keys plus 1 for current state
-                # NOTE: _n_steps_lookahead plus 1 for sustain pedal state
-                # Reshape observation into (num_piano_keys, num_steps_lookahead)
-                seq_obs = obs_arr.reshape(self._environment.task.piano.n_keys + 1, 
-                                          self._environment.task._n_steps_lookahead + 1)
-
-        static_obs = _concat(_temp_static_obs_dict)
+        # NOTE: n_keys plus 1 for sustain pedal state
+        # NOTE: _n_steps_lookahead plus 1 for current state
+        # Reshape observation into (num_steps_lookahead, num_piano_keys)
+        seq_obs = observation['goal'].reshape(self._environment.task._n_steps_lookahead + 1,
+                                              self._environment.task.piano.n_keys + 1)
+        
+        # Remove goals in temporary observation
+        _temp_obs = observation.copy()
+        _temp_obs.pop('goal')
+        # Concat "_temp_obs" to single element
+        static_obs = _concat(_temp_obs)
 
         # return dict of array
         return {self.SEQ_OBS_STR: seq_obs, 

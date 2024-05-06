@@ -46,11 +46,6 @@ class TimeseriesEnvironmentSpec: # FIXME: Change the name of this class
     @staticmethod
     def make(env: dm_env.Environment) -> "TimeseriesEnvironmentSpec":
         '''
-        NOTE: We should change the action spec into BoundedArray.
-        The previous version using specs.Array, which the minimum and maximum 
-        of all action were in range [-1,1], but I realize that some joint 
-        was not act like that.
-        NOTE: This issue effect only warmup steps.
         '''
 
         # Check environment observation spec, it must come with dict instance
