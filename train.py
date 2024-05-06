@@ -17,7 +17,7 @@ import robopianist.wrappers as robopianist_wrappers # type:ignore
 from core.RecurrentReplayBuffer import RecurrentReplayBuffer
 from common.EnvironmentSpec import RecurrentEnvironmentSpec
 from common.EnvironmentWrapper import RecurrentObservationWrapper
-from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
+from algorithm.RecurrentDroQSAC import RecurrentDroQSACAgent, RecurrentDroQSACConfig
 
 
 @dataclass(frozen=True)
@@ -63,7 +63,7 @@ class Args:
     record_resolution: Tuple[int, int] = (480, 640)
     camera_id: Optional[str | int] = "piano/back"
     action_reward_observation: bool = False
-    agent_config: DroQSACConfig = DroQSACConfig()
+    agent_config: RecurrentDroQSACConfig = RecurrentDroQSACConfig()
 
 
 def prefix_dict(prefix: str, 
@@ -169,9 +169,9 @@ def main(args: Args) -> None:
 
     spec = RecurrentEnvironmentSpec.make(env)
     # initialize agent
-    agent = DroQSACAgent(spec=spec,
-                         config=args.agent_config,
-                         gamma=args.discount)
+    agent = RecurrentDroQSACAgent(spec=spec,
+                                  config=args.agent_config,
+                                  gamma=args.discount)
 
     # initialize replay buffer
     replay_buffer = RecurrentReplayBuffer(spec=spec, 

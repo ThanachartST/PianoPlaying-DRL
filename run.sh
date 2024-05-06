@@ -10,7 +10,8 @@ WANDB_DIR=/tmp/robopianist/ MUJOCO_GL=egl XLA_PYTHON_CLIENT_PREALLOCATE=false CU
     --discount 0.8 \
     --agent-config.critic-dropout-rate 0.01 \
     --agent-config.critic-layer-norm \
-    --agent-config.hidden-sizes 256 256 256 \
+    --agent-config.rnn-hidden-size 256 \
+    --agent-config.fc-hidden-sizes 256 256 256 \
     --trim-silence \
     --gravity-compensation \
     --reduced-action-space \
