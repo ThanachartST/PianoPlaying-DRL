@@ -140,8 +140,8 @@ class RnnMlp(nn.Module):
         # Initialize hidden state with zeros
         # rnn_h_0 = torch.zeros(1, seq_input.size(0), self.rnn_hidden_size)
 
-        # rnn
-        rnn_output, _ = self.rnn(seq_input)
+        # rnn with reverse of seq_input as input
+        rnn_output, _ = self.rnn(torch.flip(seq_input, dims=[1]))
 
         # concat rnn_output and static_input
         # (batch_size, rnn_hidden_size + n_features_static)
