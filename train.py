@@ -177,7 +177,7 @@ def main(args: Args) -> None:
     replay_buffer = RecurrentReplayBuffer(spec=spec, 
                                           max_size=args.replay_capacity,
                                           batch_size=args.batch_size)
-    raise ValueError()
+    # raise ValueError()
 
     # reset environment
     timestep = env.reset()

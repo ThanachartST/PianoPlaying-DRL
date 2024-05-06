@@ -4,14 +4,17 @@ import numpy as np
 from torch import Tensor
 from typing import NamedTuple, Optional
 from common.EnvironmentSpec import RecurrentEnvironmentSpec
+from common.EnvironmentWrapper import RecurrentObservationWrapper
 
 
 class RecurrentTransitionTensor(NamedTuple):
-    state: Tensor
+    seq_state: Tensor
+    static_state: Tensor
     action: Tensor
     reward: Tensor
     discount: Tensor
-    next_state: Tensor
+    next_seq_state: Tensor
+    next_static_state: Tensor
 
 class RecurrentReplayBuffer:
     def __init__(self,
@@ -33,17 +36,23 @@ class RecurrentReplayBuffer:
         # The size for samples data  
         self._batch_size = batch_size
 
-        # FIXME: CONTINUE THIS
-        '''# Decalre the array that store, state, action, next_state, reward, discount_factors
-        self._static_states = np.zeros((max_size, ), dtype=np.float32)
-        self._seq_states
 
-        self._next_static_states
-        self._next_seq_states
+        # Get the static and sequential observations 
+        # name and shape from environment spec
+        self.seq_obs_spec = spec.seq_obs
+        _seq_obs_shape = spec.seq_obs.shape
+        _static_obs_shape = spec.static_obs.shape
+
+        # Decalre the array that store, state, action, next_state, reward, discount_factors
+        self._static_states = np.zeros((max_size, *_static_obs_shape), dtype=np.float32)
+        self._next_static_states = np.zeros((max_size, *_static_obs_shape), dtype=np.float32)
+
+        self._seq_states = np.zeros((max_size, *_seq_obs_shape), dtype=np.float32)
+        self._next_seq_states = np.zeros((max_size, *_seq_obs_shape), dtype=np.float32)
 
         self._actions = np.zeros((max_size, spec.action_dim), dtype=np.float32)
         self._rewards = np.zeros((max_size), dtype=np.float32)
-        self._discounts = np.zeros((max_size), dtype=np.float32)'''
+        self._discounts = np.zeros((max_size), dtype=np.float32)
 
         # The pointer pointing to the index of the current index
         self._ptr: int = 0
@@ -72,9 +81,14 @@ class RecurrentReplayBuffer:
 
         if action is not None:
             # Store the information state, action, next_state, reward, discount_factors
-            self._states[self._ptr] = self._prev.observation  # type: ignore
+            self._seq_states[self._ptr] = self._prev.observation
+            self._static_states[self._ptr] = self._prev.observation
+
+
+            self._next_seq_states[self._ptr] = self._latest.observation
+            self._next_static_states[self._ptr] = self._latest.observation
+
             self._actions[self._ptr] = action
-            self._next_states[self._ptr] = self._latest.observation
             self._rewards[self._ptr] = self._latest.reward
             self._discounts[self._ptr] = self._latest.discount
 

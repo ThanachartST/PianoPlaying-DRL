@@ -69,8 +69,8 @@ class RecurrentEnvironmentSpec: # FIXME: Change the name of this class
             raise TypeError('The observation spec is incorrectly')
 
         return RecurrentEnvironmentSpec(static_obs = static_obs_spec,
-                                         seq_obs = seq_obs_spec,
-                                         action = env.action_spec())
+                                        seq_obs = seq_obs_spec,
+                                        action = env.action_spec())
 
     def sample_action(self, random_state: np.random.RandomState) -> np.ndarray:
         if not isinstance(self.action, specs.BoundedArray):
