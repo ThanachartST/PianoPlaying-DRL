@@ -4,8 +4,6 @@ import numpy as np
 from torch import Tensor
 from typing import NamedTuple, Optional
 from common.EnvironmentSpec import RecurrentEnvironmentSpec
-from common.EnvironmentWrapper import RecurrentObservationWrapper
-
 
 class RecurrentTransitionTensor(NamedTuple):
     seq_state: Tensor
@@ -37,22 +35,27 @@ class RecurrentReplayBuffer:
         self._batch_size = batch_size
 
 
-        # Get the static and sequential observations 
-        # name and shape from environment spec
+        # Get the static and sequential observations spec
         self.seq_obs_spec = spec.seq_obs
-        _seq_obs_shape = spec.seq_obs.shape
-        _static_obs_shape = spec.static_obs.shape
+        self.static_obs_spec = spec.static_obs
 
         # Decalre the array that store, state, action, next_state, reward, discount_factors
-        self._static_states = np.zeros((max_size, *_static_obs_shape), dtype=np.float32)
-        self._next_static_states = np.zeros((max_size, *_static_obs_shape), dtype=np.float32)
+        self._seq_states = np.zeros(shape = (max_size, *self.seq_obs_spec.shape), 
+                                    dtype = np.float32)
+        self._next_seq_states = np.zeros(shape = (max_size, *self.seq_obs_spec.shape), 
+                                         dtype = np.float32)
 
-        self._seq_states = np.zeros((max_size, *_seq_obs_shape), dtype=np.float32)
-        self._next_seq_states = np.zeros((max_size, *_seq_obs_shape), dtype=np.float32)
+        self._static_states = np.zeros(shape = (max_size, *self.static_obs_spec.shape), 
+                                       dtype = np.float32)
+        self._next_static_states = np.zeros(shape = (max_size, *self.static_obs_spec.shape), 
+                                            dtype = np.float32)
 
-        self._actions = np.zeros((max_size, spec.action_dim), dtype=np.float32)
-        self._rewards = np.zeros((max_size), dtype=np.float32)
-        self._discounts = np.zeros((max_size), dtype=np.float32)
+        self._actions = np.zeros(shape = (max_size, spec.action_dim), 
+                                 dtype = np.float32)
+        self._rewards = np.zeros(shape = (max_size), 
+                                 dtype = np.float32)
+        self._discounts = np.zeros(shape = (max_size), 
+                                   dtype = np.float32)
 
         # The pointer pointing to the index of the current index
         self._ptr: int = 0
@@ -72,7 +75,8 @@ class RecurrentReplayBuffer:
 
         Args:
             timestep: TimeStep object, contain the environment information
-                ['state', 'next_state', 'reward', 'discount' ]
+                ['_seq_states', '_static_states', 'reward', 'discount'
+                 '_next_seq_states', '_next_static_states' ]
 
         '''
         self._prev = self._latest
@@ -81,12 +85,11 @@ class RecurrentReplayBuffer:
 
         if action is not None:
             # Store the information state, action, next_state, reward, discount_factors
-            self._seq_states[self._ptr] = self._prev.observation
-            self._static_states[self._ptr] = self._prev.observation
+            self._seq_states[self._ptr] = self._prev.observation[self.seq_obs_spec.name]
+            self._static_states[self._ptr] = self._prev.observation[self.static_obs_spec.name]
 
-
-            self._next_seq_states[self._ptr] = self._latest.observation
-            self._next_static_states[self._ptr] = self._latest.observation
+            self._next_seq_states[self._ptr] = self._latest.observation[self.seq_obs_spec.name]
+            self._next_static_states[self._ptr] = self._latest.observation[self.static_obs_spec.name]
 
             self._actions[self._ptr] = action
             self._rewards[self._ptr] = self._latest.reward
@@ -106,19 +109,22 @@ class RecurrentReplayBuffer:
         
         Returns:
             RecurrentTransitionTensor: NamedTuple object 
-                with keys: [ 'state', 'action', 'reward', 'discount', 'next_state' ]
+                with keys: ['seq_state', 'static_state', 
+                            'action', 'reward', 'discount', 
+                            'next_seq_state', 'next_static_state' ]
         '''
         
         # Random integer in range [0, self._size], return int array with shape (self._batch_size)
         self._ind = np.random.randint(0, self._size, size=self._batch_size)
     
         return RecurrentTransitionTensor(
-            state = Tensor(self._states[self._ind]).to(device),
-            action = Tensor(self._actions[self._ind]).to(device),
-            reward = Tensor(self._rewards[self._ind]).unsqueeze(1).to(device),
-            discount = Tensor(self._discounts[self._ind]).unsqueeze(1).to(device),
-            next_state = Tensor(self._next_states[self._ind]).to(device)
-        )
+            seq_state         = Tensor(self._seq_states[self._ind]).to(device),
+            static_state      = Tensor(self._static_states[self._ind]).to(device), 
+            action            = Tensor(self._actions[self._ind]).to(device),
+            reward            = Tensor(self._rewards[self._ind]).unsqueeze(1).to(device),
+            discount          = Tensor(self._discounts[self._ind]).unsqueeze(1).to(device),
+            next_seq_state    = Tensor(self._next_seq_states[self._ind]).to(device), 
+            next_static_state = Tensor(self._next_static_states[self._ind]).to(device))
     
     
     def __len__(self) -> int:
