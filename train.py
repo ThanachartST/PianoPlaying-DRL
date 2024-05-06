@@ -14,9 +14,9 @@ from robopianist import suite
 import robopianist.wrappers as robopianist_wrappers # type:ignore
 
 # LOCAL LIBRARY
-from core.ReplayBuffer import ReplayBuffer
-from common.EnvironmentSpec import EnvironmentSpec, TimeseriesEnvironmentSpec
-from common.EnvironmentWrapper import TimeseriesObservationWrapper
+from core.RecurrentReplayBuffer import RecurrentReplayBuffer
+from common.EnvironmentSpec import RecurrentEnvironmentSpec
+from common.EnvironmentWrapper import RecurrentObservationWrapper
 from algorithm.DroQSAC import DroQSACAgent, DroQSACConfig
 
 
@@ -134,7 +134,7 @@ def get_env(args: Args,
     env = wrappers.CanonicalSpecWrapper(env, clip=args.clip)
     env = wrappers.SinglePrecisionWrapper(env)
     env = wrappers.DmControlWrapper(env)
-    env = TimeseriesObservationWrapper(env)
+    env = RecurrentObservationWrapper(env)
     return env
 
 
@@ -167,18 +167,17 @@ def main(args: Args) -> None:
     env = get_env(args)
     eval_env = get_env(args, record_dir=experiment_dir / "eval")
 
-    spec = TimeseriesEnvironmentSpec.make(env)
-    # raise ValueError()
+    spec = RecurrentEnvironmentSpec.make(env)
     # initialize agent
     agent = DroQSACAgent(spec=spec,
                          config=args.agent_config,
                          gamma=args.discount)
 
     # initialize replay buffer
-    replay_buffer = ReplayBuffer(state_dim=spec.observation_dim,
-                                 action_dim=spec.action_dim,
-                                 max_size=args.replay_capacity,
-                                 batch_size=args.batch_size)
+    replay_buffer = RecurrentReplayBuffer(spec=spec, 
+                                          max_size=args.replay_capacity,
+                                          batch_size=args.batch_size)
+    raise ValueError()
 
     # reset environment
     timestep = env.reset()

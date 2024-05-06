@@ -1,11 +1,11 @@
 import dm_env
 import numpy as np
 from dm_env import specs
-from typing import Sequence
+from typing import Dict
 from dataclasses import dataclass
 
 # LOCAL LIB
-from common.EnvironmentWrapper import TimeseriesObservationWrapper
+from common.EnvironmentWrapper import RecurrentObservationWrapper
 
 @dataclass(frozen=True)
 class EnvironmentSpec:
@@ -38,13 +38,13 @@ class EnvironmentSpec:
 
 # FIXME: For RNN Task we need to fixed this Spec Class
 @dataclass(frozen=True)
-class TimeseriesEnvironmentSpec: # FIXME: Change the name of this class
+class RecurrentEnvironmentSpec: # FIXME: Change the name of this class
     static_obs: specs.Array
     seq_obs: specs.Array
     action: specs.Array
 
     @staticmethod
-    def make(env: dm_env.Environment) -> "TimeseriesEnvironmentSpec":
+    def make(env: dm_env.Environment) -> "RecurrentEnvironmentSpec":
         '''
         '''
 
@@ -53,22 +53,22 @@ class TimeseriesEnvironmentSpec: # FIXME: Change the name of this class
         if isinstance(obs_spec, dict):
             
             # Get static observation
-            if obs_spec.get(TimeseriesObservationWrapper.STATIC_OBS_STR):
-                static_obs_spec = obs_spec[TimeseriesObservationWrapper.STATIC_OBS_STR]
+            if obs_spec.get(RecurrentObservationWrapper.STATIC_OBS_NAME):
+                static_obs_spec = obs_spec[RecurrentObservationWrapper.STATIC_OBS_NAME]
             else:
-                raise KeyError(f'{TimeseriesObservationWrapper.STATIC_OBS_STR} Not in environment observation spec ')
+                raise KeyError(f'{RecurrentObservationWrapper.STATIC_OBS_NAME} Not in environment observation spec ')
             
             # Get sequential observation
-            if obs_spec.get(TimeseriesObservationWrapper.SEQ_OBS_STR):
-                seq_obs_spec = obs_spec[TimeseriesObservationWrapper.SEQ_OBS_STR]
+            if obs_spec.get(RecurrentObservationWrapper.SEQ_OBS_NAME):
+                seq_obs_spec = obs_spec[RecurrentObservationWrapper.SEQ_OBS_NAME]
             else:
-                raise KeyError(f'{TimeseriesObservationWrapper.SEQ_OBS_STR} Not in environment observation spec ')
+                raise KeyError(f'{RecurrentObservationWrapper.SEQ_OBS_NAME} Not in environment observation spec ')
 
 
         else:
             raise TypeError('The observation spec is incorrectly')
 
-        return TimeseriesEnvironmentSpec(static_obs = static_obs_spec,
+        return RecurrentEnvironmentSpec(static_obs = static_obs_spec,
                                          seq_obs = seq_obs_spec,
                                          action = env.action_spec())
 
@@ -82,8 +82,9 @@ class TimeseriesEnvironmentSpec: # FIXME: Change the name of this class
         return action.astype(self.action.dtype)
 
     @property
-    def observation_dim(self) -> Sequence[tuple]:
-        return (self.seq_obs.shape, self.static_obs.shape)
+    def observation_dim(self) -> dict:
+        return {RecurrentObservationWrapper.SEQ_OBS_NAME: self.seq_obs.shape, 
+                RecurrentObservationWrapper.STATIC_OBS_NAME: self.static_obs.shape}
 
     @property
     def action_dim(self) -> int:

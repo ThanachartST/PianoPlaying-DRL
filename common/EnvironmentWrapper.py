@@ -9,12 +9,12 @@ from dm_env import specs
 from dm_env_wrappers._src import base
 from dm_env_wrappers._src.concatenate_observations import _zeros_like, _concat
 
-class TimeseriesObservationWrapper(base.EnvironmentWrapper):
+class RecurrentObservationWrapper(base.EnvironmentWrapper):
     '''
     NOTE: The wrapper using on Robopianist tasks only!!!
     '''
-    SEQ_OBS_STR = 'sequential_obs'
-    STATIC_OBS_STR = 'static_obs'
+    SEQ_OBS_NAME = 'sequential_obs'
+    STATIC_OBS_NAME = 'static_obs'
 
     def __init__(self, environment: dm_env.Environment):
         super().__init__(environment)
@@ -54,8 +54,8 @@ class TimeseriesObservationWrapper(base.EnvironmentWrapper):
         static_obs = _concat(_temp_obs)
 
         # return dict of array
-        return {self.SEQ_OBS_STR: seq_obs, 
-                self.STATIC_OBS_STR: static_obs}
+        return {self.SEQ_OBS_NAME: seq_obs, 
+                self.STATIC_OBS_NAME: static_obs}
     
     def observation_spec(self):
         return self._observation_spec
