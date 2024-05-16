@@ -12,6 +12,7 @@ import dm_env_wrappers as wrappers
 from dataclasses import dataclass, asdict
 from robopianist import suite
 import robopianist.wrappers as robopianist_wrappers # type:ignore
+import torch
 
 # LOCAL LIBRARY
 from core.RecurrentReplayBuffer import RecurrentReplayBuffer
@@ -159,7 +160,7 @@ def main(args: Args) -> None:
         tags=(args.tags.split(",") if args.tags else []),
         notes=args.notes or None,
         config=asdict(args),
-        # mode=args.mode,
+        mode=args.mode,
         name=run_name,
     )
 
@@ -233,6 +234,7 @@ def main(args: Args) -> None:
         if i % args.log_interval == 0:
             wandb.log({"train/fps": int(i / (time.time() - start_time))}, step=i)
 
+    torch.save( agent, f'./{args.environment_name}.pt' )
 
 if __name__ == "__main__":
     main(tyro.cli(Args, description=__doc__))
