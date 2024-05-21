@@ -90,7 +90,7 @@ bash run.sh
 
 ## Acknowledgements
 
-Thank you to the following open-source resources.
+We would like to thank the following open-source resources.
 
 - [Robopianist](https://github.com/google-research/robopianist) authors for their main reference techniques and methodologies.
 - [Mujoco](https://github.com/google-deepmind/mujoco_menagerie) for developing the physics engine used in this project.
