@@ -5,14 +5,14 @@ Combining MLP and RNN networks with the DroQSAC algorithm for controlling the ro
 <!-- [![Video](./docs/video/FurEllise_RNN_84.mp4)](./docs/video/FurEllise_RNN_84.mp4) -->
 
 - [Installation](#installation)
-- [Folder Structure](#folder-structure)
 - [Dataset](#dataset)
+- [Usage](#usage)
+- [Folder Structure](#folder-structure)
 - [Acknowledgements](#acknowledgements)
 
 ## Installation 
 
-**1. Clone the Repository**
-- Clone the repository and navigate into
+**1. Clone the repository and navigate to the repository directory.**
 ```bash
 git clone https://github.com/ThanachartST/PianoPlaying-DRL.git && cd PianoPlaying-DRL
 ```
@@ -48,6 +48,23 @@ pip install -e ".[dev]"
 make test
 ```
 
+## Datasets
+
+<!-- - [Pig Datasets](https://arxiv.org/abs/1904.10237) -->
+
+The dataset is downloaded from the [PIG website](https://beam.kisarazu.ac.jp/~saito/research/PianoFingeringDataset/), and the preprocessing script from [Robopianist dataset document](https://github.com/google-research/robopianist/blob/main/docs/dataset.md). Please complete the instructions before proceeding to the next steps.
+
+
+## Usage
+
+To train the agent, you can use the following command. Make sure you are in the repository directory and activated your environment before running.
+
+```bash
+bash run.sh
+```
+
+> [!NOTE]
+> You can tune the hyperparameters in the `run.sh` script, such as changing the training song, increasing the batch size, and adjusting the network parameters.
 
 ## Folder structure
 
@@ -68,18 +85,13 @@ make test
 ```
 
 - `algorithm`: This folder contains the RL algorithm class, which includes the main algorithm, DroQSAC.
-- `common`: The common module for the piano playing tasks.
-- `core`: The core components contributing to DroQSAC.
+- `common`: The common module for piano-playing tasks to define the tasks and the environment specifications.
+- `core`: The core components contributing to DroQSAC include the networks module, replay buffer, and distributions class.
 - `train.py`: This Python file is used to train the agent. You can specify training arguments with the CLI command, which is editable in `run.sh`.
-
-## Datasets
-
-<!-- - [Pig Datasets](https://arxiv.org/abs/1904.10237) -->
 
 
 ## Acknowledgements
-<!-- 
-- Mujoco
-- Mujoco menagerie
+
 - Robopianist
-- MIDI licences -->
+- Mujoco
+- PIG datasets
