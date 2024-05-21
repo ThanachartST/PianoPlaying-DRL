@@ -18,7 +18,7 @@ git clone https://github.com/ThanachartST/PianoPlaying-DRL.git && cd PianoPlayin
 ```
 
 **2. Set Up Git Submodules**
-- Initialize and update submodules for this repository and  [Robopianist](https://github.com/google-research/robopianist/tree/main).
+- Initialize and update submodules for this repository and  [Robopianist](https://github.com/google-research/robopianist).
 
 ```bash
 git submodule init && git submodule update
@@ -92,6 +92,8 @@ bash run.sh
 
 ## Acknowledgements
 
-- Robopianist
-- Mujoco
-- PIG datasets
+Thank you to the thanks to the following open-source resources.
+
+- [Robopianist](https://github.com/google-research/robopianist) authors for their main reference techniques and methodologies.
+- [Mujoco](https://github.com/google-deepmind/mujoco_menagerie) for developing the physics engine used in this project.
+- [Pig Datasets](https://arxiv.org/abs/1904.10237) for providing the datasets supporting the piano-playing tasks.
