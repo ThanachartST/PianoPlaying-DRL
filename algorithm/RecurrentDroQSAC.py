@@ -1,15 +1,14 @@
 # OPEN-SOURCE LIBRARY
 import torch
-import numpy as np
 import torch.nn as nn
 from torch import Tensor
 import torch.optim as optim
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Sequence
+from typing import Optional, Sequence
 
 # LOCAL LIBRARY
 from core.Distribution import RecurrentTanhGaussianPolicy
-from core.Network import MLP, RnnMlp
+from core.Network import RnnMlp
 from core.RecurrentReplayBuffer import RecurrentTransitionTensor
 from common.EnvironmentSpec import RecurrentEnvironmentSpec
 
