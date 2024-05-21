@@ -56,10 +56,10 @@ make test
 ```bash
 ├── algorithm
 │   └── RecurrentDroQSAC.py
-|── common
+├── common
 │   ├── EnvironmentSpec.py
 │   └── EnvironmentWrapper.py
-|── core
+├── core
 │   ├── Distribution.py
 │   ├── Network.py
 │   └── RecurrentReplayBuffer.py
@@ -83,5 +83,3 @@ make test
 - Mujoco menagerie
 - Robopianist
 - MIDI licences -->
-
-
