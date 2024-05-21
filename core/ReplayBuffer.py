@@ -4,14 +4,6 @@ import numpy as np
 from torch import Tensor
 from typing import NamedTuple, Optional
 
-
-class Transition(NamedTuple):
-    state: np.ndarray
-    action: np.ndarray
-    reward: np.ndarray
-    discount: np.ndarray
-    next_state: np.ndarray
-
 class TransitionTensor(NamedTuple):
     state: Tensor
     action: Tensor

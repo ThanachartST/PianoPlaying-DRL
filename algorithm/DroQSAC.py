@@ -1,16 +1,15 @@
 # OPEN-SOURCE LIBRARY
 import torch
-import numpy as np
 import torch.nn as nn
 from torch import Tensor
 import torch.optim as optim
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Optional, Sequence
 
 # LOCAL LIBRARY
 from core.Distribution import TanhGaussianPolicy
 from core.Network import MLP
-from core.ReplayBuffer import Transition
+from core.ReplayBuffer import TransitionTensor
 from common.EnvironmentSpec import EnvironmentSpec
 
     
@@ -217,7 +216,7 @@ class DroQSACAgent(object):
             model1_param.data.copy_(rho*model1_param.data + (1-rho)*model2_param.data)
 
     def update_actor(self, 
-                     transitions: Transition):
+                     transitions: TransitionTensor):
         ''' 
         Update actor or policy network.
 
@@ -259,7 +258,7 @@ class DroQSACAgent(object):
         return {"policy_loss": policy_loss, "batch_entropy": -log_prob_a_tilda}
 
     def update_critic(self, 
-                      transitions: Transition):
+                      transitions: TransitionTensor):
         ''' 
         Update critic or Q networks.
 
@@ -318,7 +317,7 @@ class DroQSACAgent(object):
         return {"alpha_loss": alpha_loss}
 
     def update(self, 
-               transitions: Transition):
+               transitions: TransitionTensor):
         ''' 
         Update agent (actor, critic, temperature).
 

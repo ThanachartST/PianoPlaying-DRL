@@ -156,7 +156,7 @@ def main(args: Args) -> None:
         tags=(args.tags.split(",") if args.tags else []),
         notes=args.notes or None,
         config=asdict(args),
-        # mode=args.mode,
+        mode=args.mode,
         name=run_name,
     )
 

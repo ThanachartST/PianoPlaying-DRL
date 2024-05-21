@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 
 import dm_env
-import jax
-import jax.numpy as jnp
 import numpy as np
 from dm_env import specs
 
@@ -35,7 +33,3 @@ class EnvironmentSpec:
     @property
     def action_dim(self) -> int:
         return self.action.shape[-1]
-
-
-def zeros_like(spec: specs.Array) -> jnp.ndarray:
-    return jax.tree_util.tree_map(lambda x: jnp.zeros(x.shape, x.dtype), spec)
