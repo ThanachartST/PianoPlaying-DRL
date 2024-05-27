@@ -2,7 +2,7 @@
 
 Combining MLP and RNN networks with the DroQSAC algorithm for controlling the robot hands to play the piano. Our network is designed for music pattern recognition, resulting in better convergence efficiency compared to MLP.
 
-Our document can be found [here](./PianoPlaying-DRL/docs/Piano_Playing_with_DroQSAC_and_RNN.pdf).
+Our document can be found [here](https://github.com/ThanachartST/PianoPlaying_RNN-MLP/blob/main/docs/Piano_Playing_with_DroQSAC_and_RNN.pdf).
 <!-- Add video here -->
 <!-- [![Video](./docs/video/FurEllise_RNN_84.mp4)](./docs/video/FurEllise_RNN_84.mp4) -->
 
